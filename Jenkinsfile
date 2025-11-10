@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        IMAGE_NAME = "ghcr.io/<GITHUB_USERNAME>/my-java-backend:latest"
+        IMAGE_NAME = "ghcr.io/CherupallyPremkumar/my-java-backend:latest"
     }
 
     stages {
