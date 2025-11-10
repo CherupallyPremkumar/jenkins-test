@@ -1,13 +1,13 @@
 pipeline {
     agent {
         docker {
-            image 'maven:3.9.2-openjdk-17' // Docker image to use
+            image 'maven:3.9.9-eclipse-temurin-17'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
         }
     }
-    
 
     environment {
-        DOCKER_IMAGE = "my-java-backend:latest"
+        IMAGE_NAME = "ghcr.io/<GITHUB_USERNAME>/my-java-backend:latest"
     }
 
     stages {
@@ -25,20 +25,23 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${DOCKER_IMAGE} ."
+                sh "docker build -t ${IMAGE_NAME} ."
             }
         }
 
-        stage('Run Container') {
+        stage('Push to GHCR') {
             steps {
-                sh "docker run -d -p 8080:8080 --name java-backend ${DOCKER_IMAGE}"
+                withCredentials([usernamePassword(credentialsId: 'ghcr-cred', usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_TOKEN')]) {
+                    sh "echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin"
+                    sh "docker push ${IMAGE_NAME}"
+                }
             }
         }
     }
-
+    
     post {
         always {
-            sh 'docker rm -f java-backend || true'
+            sh "docker rmi ${IMAGE_NAME} || true"
         }
     }
 }
