@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'maven:3.9.2-openjdk-17' // Docker image to use
+        }
+    }
+    
 
     environment {
         DOCKER_IMAGE = "my-java-backend:latest"
